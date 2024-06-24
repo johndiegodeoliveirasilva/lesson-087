@@ -24,7 +24,7 @@ jobs:
         export_default_credentials: true
 
 
-    -name: Get the latest tag
+    - name: Get the latest tag
       id: latest-tag
       run: |
         git fetch --tags
