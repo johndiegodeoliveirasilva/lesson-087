@@ -34,6 +34,7 @@ jobs:
 
     - name: Authenticate Docker to GCP Container Registry
       run: |
+        echo "${{ secrets.GCP_SA_KEY }}" | gcloud auth activate-service-account --key-file=-
         gcloud auth configure-docker --quiet
 
     - name: Push Docker Image to GCP Container Registry (GCR)
