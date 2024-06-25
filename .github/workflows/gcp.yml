@@ -24,20 +24,23 @@ jobs:
 
     - name: Get the latest tag
       id: latest-tag
-      run: |
+      run: |-
         git fetch --tags
         echo "GIT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
 
     - name: Authenticate Docker to GCP Container Registry
-      run: |
+      run: |-
         gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
     - name: Build Docker Image
       run: docker build -t $IMAGE_NAME:${{ env.GIT_TAG }} .
 
     - name: Tag Docker Image
-      run: docker tag $IMAGE_NAME:${{ env.GIT_TAG }}
+      run: |-
+        docker tag $IMAGE_NAME:latest gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
+        docker tag $IMAGE_NAME:${{ env.GIT_TAG }} gcr.io/$PROJECT_ID/$IMAGE_NAME:${{ env.GIT_TAG }}
 
     - name: Push Docker Image to GCP Container Registry (GCR)
       run: |
-        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:${{ env.GIT_TAG }}
+        docker push gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
+        docker push gcr.io/$PROJECT_ID/$IMAGE_NAME:${{ env.GIT_TAG }}
