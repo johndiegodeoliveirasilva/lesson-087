@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       environmnet: hw-prod
-      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      PROJECT_ID: ${{ GCP_PROJECT_ID }}
       IMAGE_NAME: lesson-087
     steps:
     - name: Checkout repository
@@ -19,8 +19,8 @@ jobs:
     # Login to GCP
     - uses: google-github-actions/setup-gcloud@v2
       with:
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ GCP_SA_KEY }}
+        project_id: ${{ GCP_PROJECT_ID }}
         export_default_credentials: true
 
 
