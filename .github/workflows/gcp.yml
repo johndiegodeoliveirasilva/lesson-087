@@ -9,6 +9,7 @@ jobs:
     name: Build and Push Docker Image to GCP Container Registry
     runs-on: ubuntu-latest
     env:
+      environmnet: hw-prod
       PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       IMAGE_NAME: lesson-087
     steps:
