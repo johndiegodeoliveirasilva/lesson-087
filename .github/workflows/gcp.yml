@@ -11,7 +11,7 @@ jobs:
     environment: hw-prod
     env:
       PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/lesson-087
+      IMAGE_NAME: lesson-087
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -40,4 +40,4 @@ jobs:
 
     - name: Push Docker Image to GCP Container Registry (GCR)
       run: |
-        docker push $IMAGE_NAME:${{ env.GIT_TAG }}
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:${{ env.GIT_TAG }}
