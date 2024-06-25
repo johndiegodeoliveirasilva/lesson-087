@@ -9,12 +9,13 @@ jobs:
     name: Build and Push Docker Image to GCP Container Registry
     runs-on: ubuntu-latest
     env:
-      PROJECT_ID: cloud-deploy-424319
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       IMAGE_NAME: lesson-087
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    # Login to GCP
     - uses: google-github-actions/setup-gcloud@v2
       with:
         service_account_key: ${{ secrets.GCP_SA_KEY }}
@@ -34,7 +35,7 @@ jobs:
 
     - name: Authenticate Docker to GCP Container Registry
       run: |
-        echo "${{ secrets.GCP_SA_KEY }}" | gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+        gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
     - name: Push Docker Image to GCP Container Registry (GCR)
       run: |-
