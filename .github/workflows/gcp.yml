@@ -1,46 +1,48 @@
----
-name: Build and Push Python Docker Image to GCP Container Registry
+# Builds the Docker image and then deploys it to Google Cloud's Artifact Registry
+name: 🛠️ Build & Deploy
+
 on:
   push:
-    branches: [ main ]
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
-  build-push-gcr:
-    name: Build and Push Docker Image to GCP Container Registry
+  environment: hw-prod
+  deploy:
+    name: 🛠️ Build & Deploy
     runs-on: ubuntu-latest
-    environment: hw-prod
-    env:
-      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      IMAGE_NAME: ${{ secrets.GCP_IMAGE_NAME }}
-      REPOSITORY_NAME: ${{ secrets.GCP_REPOSITORY_NAME }}
-      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-      GIT_TAG: v0.1.0
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - uses: 'actions/checkout@v4'
+        name: 🔽 Checkout
+      
+      - uses: 'google-github-actions/auth@v2'
+        name: 🔑 Google Cloud Auth
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          # Read up on how the `auth` actions works: https://github.com/google-github-actions/auth
+          # If you'd rather use identity providers,
+          # comment out the `credentials_json` bit and uncomment the following:
+          
+          # workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+          # service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
-    # Login to GCP
-    - uses: google-github-actions/setup-gcloud@v2
-      with:
-        service_account_key: $GCP_SA_KEY
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Get the latest tag
+        id: latest-tag
+        run: |-
+          git fetch --tags
+          echo "GIT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
 
-    - name: Get the latest tag
-      id: latest-tag
-      run: |-
-        git fetch --tags
-        echo "GIT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
+      - name: 🐋 Build Docker image
+        run: docker build -t ${{ secrets.GCP_IMAGE_NAME }}:latest .
 
-    - name: Authenticate Docker to GCP Artifact Registry
-      run: |-
-        gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+      - name: 🐋 Configure Docker for pushing
+        run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
 
-    - name: Build Docker Image
-      run: docker build -t $IMAGE_NAME:${{ env.GIT_TAG }} .
-
-    - name: Push Docker Image to Artifact Registry
-      env:
-        GIT_TAG: v0.1.0
-      run: |-
-        docker tag $IMAGE_NAME:${{ env.GIT_TAG }} us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY_NAME/$IMAGE_NAME:${{ env.GIT_TAG }}
-        docker push us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY_NAME/$IMAGE_NAME:${{ env.GIT_TAG }}
+      # This deploys under 2 tags. One is `latest` and the other one is the last commit's SHA
+      - name: ☁️ Deploy to GCP Artifact Registry
+        run: |-
+          docker tag ${{ secrets.GCP_IMAGE_NAME }}:latest ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REPOSITORY_NAME }}/${{ secrets.GCP_IMAGE_NAME }}:latest
+          docker tag ${{ secrets.GCP_IMAGE_NAME }}:latest ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REPOSITORY_NAME }}/${{ secrets.GCP_IMAGE_NAME }}:$GIT_TAG
+          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REPOSITORY_NAME }}/${{ secrets.GCP_IMAGE_NAME }}:latest
+          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REPOSITORY_NAME }}/${{ secrets.GCP_IMAGE_NAME }}:$GIT_TAG
