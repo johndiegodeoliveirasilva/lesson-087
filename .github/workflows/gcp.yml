@@ -12,6 +12,7 @@ jobs:
     env:
       PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       IMAGE_NAME: lesson-087
+      REPOSITORY_NAME: images
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -37,8 +38,8 @@ jobs:
 
     - name: Tag Docker Image
       run: |-
-        docker tag $IMAGE_NAME:${{ env.GIT_TAG }} us-central1-docker.pkg.dev/$PROJECT_ID/$IMAGE_NAME:${{ env.GIT_TAG }}
+        docker tag $IMAGE_NAME:${{ env.GIT_TAG }} us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY_NAME/$IMAGE_NAME:${{ env.GIT_TAG }}
 
     - name: Push Docker Image to GCP Container Registry (GCR)
       run: |
-        docker push us-central1-docker.pkg.dev/$PROJECT_ID/$IMAGE_NAME:${{ env.GIT_TAG }}
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY_NAME/$IMAGE_NAME:${{ env.GIT_TAG }}
