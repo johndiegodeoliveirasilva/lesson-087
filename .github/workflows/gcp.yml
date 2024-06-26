@@ -25,22 +25,22 @@ jobs:
         service_account_key: $GCP_SA_KEY
         project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-    #- name: Get the latest tag
-    #  id: latest-tag
-    #  run: |-
-    #    git fetch --tags
-    #    echo "GIT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
+    - name: Get the latest tag
+      id: latest-tag
+      run: |-
+        git fetch --tags
+        echo "GIT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
 
     - name: Authenticate Docker to GCP Artifact Registry
       run: |-
         gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-    #- name: Build Docker Image
-    #  run: docker build -t $IMAGE_NAME:${{ env.GIT_TAG }} .
+    - name: Build Docker Image
+      run: docker build -t $IMAGE_NAME:${{ env.GIT_TAG }} .
 
     - name: Push Docker Image to Artifact Registry
       env:
         GIT_TAG: v0.1.0
       run: |-
-        docker tag $IMAGE_NAME:$GIT_TAG us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY_NAME/$IMAGE_NAME:$GIT_TAG
-        docker push us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY_NAME/$IMAGE_NAME:$GIT_TAG
+        docker tag $IMAGE_NAME:${{ env.GIT_TAG }} us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY_NAME/$IMAGE_NAME:${{ env.GIT_TAG }}
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY_NAME/$IMAGE_NAME:${{ env.GIT_TAG }}
