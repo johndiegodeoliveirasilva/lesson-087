@@ -44,6 +44,7 @@ jobs:
       # This deploys under 2 tags. One is `latest` and the other one is the last commit's SHA
       - name: ☁️ Deploy to GCP Artifact Registry
         run: |-
+          echo ${{ secrets.GCP_IMAGE_NAME }}:latest ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REPOSITORY_NAME }}/${{ secrets.GCP_IMAGE_NAME }}:latest
           docker tag ${{ secrets.GCP_IMAGE_NAME }}:latest ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REPOSITORY_NAME }}/${{ secrets.GCP_IMAGE_NAME }}:latest
           docker tag ${{ secrets.GCP_IMAGE_NAME }}:latest ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REPOSITORY_NAME }}/${{ secrets.GCP_IMAGE_NAME }}:$GIT_TAG
           docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REPOSITORY_NAME }}/${{ secrets.GCP_IMAGE_NAME }}:latest
