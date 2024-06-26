@@ -8,10 +8,10 @@ on:
     branches: ["main"]
 
 jobs:
-  environment: hw-prod
   deploy:
     name: 🛠️ Build & Deploy
     runs-on: ubuntu-latest
+    environment: hw-prod
     steps:
       - uses: 'actions/checkout@v4'
         name: 🔽 Checkout
